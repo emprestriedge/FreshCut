@@ -1,0 +1,9 @@
+{
+  "appId": "com.freshcutrecall.app",
+  "appName": "FreshCut Recall",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
