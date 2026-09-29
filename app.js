@@ -123,7 +123,7 @@ function handleSave(event) {
   const editId = document.getElementById('editId').value;
   const name = document.getElementById('personName').value.trim();
   const phone = document.getElementById('phoneNumber').value.trim();
-  const clipper = document.getElementById('clipperType').value.trim();
+  const occupation = document.getElementById('occupation').value.trim();
   const talked = document.getElementById('talkAbout').value.trim();
   const location = document.getElementById('location').value.trim();
   const notes = document.getElementById('notes').value.trim();
@@ -144,7 +144,7 @@ function handleSave(event) {
         name,
         phone,
         location,
-        clipper,
+        occupation,
         talked,
         hasPets,
         petKind: hasPets ? petKind : '',
@@ -163,7 +163,7 @@ function handleSave(event) {
       name,
       phone,
       location,
-      clipper,
+      occupation,
       talked,
       hasPets,
       petKind: hasPets ? petKind : '',
@@ -187,7 +187,7 @@ function clearForm() {
   document.getElementById('editId').value = '';
   document.getElementById('personName').value = '';
   document.getElementById('phoneNumber').value = '';
-  document.getElementById('clipperType').value = '';
+  document.getElementById('occupation').value = '';
   document.getElementById('talkAbout').value = '';
   document.getElementById('petKind').value = '';
   document.getElementById('kidInfo').value = '';
@@ -231,7 +231,7 @@ const SEARCH_FIELDS = [
   ['kidInfo', 'Kids'],
   ['notes', 'Notes'],
   ['location', 'Location'],
-  ['clipper', 'Hair'],
+  ['occupation', 'Occupation'],
   ['name', ''],
   ['phone', '']
 ];
@@ -335,7 +335,7 @@ function renderClientList() {
     const lastDate = formatDate(client.editedAt || client.createdAt);
 
     // When a keyword hits a detail field, show that field instead of the usual preview
-    let preview = escapeHtml(client.clipper || client.talked || 'Tap to view');
+    let preview = escapeHtml(client.occupation || client.talked || 'Tap to view');
     let snippet = false;
     if (words.length) {
       const hit = SEARCH_FIELDS.find(([key, label]) => label && found.has(key));
@@ -471,7 +471,7 @@ function openProfile(clientId) {
   const fields = [
     { label: 'Phone Number', value: client.phone, icon: 'fa-phone' },
     { label: 'Location', value: client.location, icon: 'fa-location-dot' },
-    { label: 'Hair Type / Clipper Guard', value: client.clipper, icon: 'fa-ruler' },
+    { label: 'Occupation', value: client.occupation, icon: 'fa-briefcase' },
     { label: 'Conversation', value: client.talked, icon: 'fa-comments' },
     {
       label: 'Pets',
@@ -554,7 +554,7 @@ function editClient(clientId) {
   document.getElementById('editId').value = client.id;
   document.getElementById('personName').value = client.name;
   document.getElementById('phoneNumber').value = client.phone || '';
-  document.getElementById('clipperType').value = client.clipper || '';
+  document.getElementById('occupation').value = client.occupation || '';
   document.getElementById('talkAbout').value = client.talked || '';
   document.getElementById('location').value = client.location || '';
   document.getElementById('notes').value = client.notes || '';
@@ -667,12 +667,12 @@ function exportToCSV() {
     return;
   }
 
-  const headers = ['Name', 'Phone', 'Location', 'Hair Type/Clipper Guard', 'Conversation', 'Pets', 'Pet Kind', 'Kids', 'Kid Info', 'Notes', 'Date Added', 'Date Edited'];
+  const headers = ['Name', 'Phone', 'Location', 'Occupation', 'Conversation', 'Pets', 'Pet Kind', 'Kids', 'Kid Info', 'Notes', 'Date Added', 'Date Edited'];
   const rows = clients.map(c => [
     c.name,
     c.phone || '',
     c.location || '',
-    c.clipper || '',
+    c.occupation || '',
     c.talked || '',
     c.hasPets === true ? 'Yes' : c.hasPets === false ? 'No' : '',
     c.petKind || '',
@@ -696,6 +696,72 @@ function exportToCSV() {
   URL.revokeObjectURL(url);
   showToast('Exported!');
 }
+
+// ── SAMPLE CLIENTS (first launch only) ────────────────────
+// Four made-up people so a brand-new install (and the PFD demo)
+// opens with something to look at. Seeded once per device: delete
+// them and they stay gone. Dates are relative to the first launch
+// so the calendar always has dots in the current month.
+
+const SEEDED_KEY = 'freshcut-recall-sample-seeded';
+
+function seedSampleClients() {
+  try {
+    if (localStorage.getItem(SEEDED_KEY)) return;
+    localStorage.setItem(SEEDED_KEY, new Date().toISOString());
+    if (loadClients().length > 0) return;   // never mix samples into real data
+  } catch (e) {
+    return;
+  }
+
+  const daysAgo = (days, hour) => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    d.setHours(hour, 15, 0, 0);
+    return d.toISOString();
+  };
+
+  saveClients([
+    {
+      id: generateId(), name: 'Jasmine Carter', phone: '(708) 555-0147', location: 'Homewood',
+      occupation: 'Pediatric nurse',
+      talked: "Just got back from a girls' trip to Nashville. Training for her first half marathon.",
+      hasPets: true, petKind: 'Cocker spaniel named Biscuit',
+      hasKids: true, kidInfo: '2 — a 6 year old and a 9 year old',
+      notes: 'Wants to go lighter by summer. Prefers Saturday mornings.',
+      createdAt: daysAgo(0, 10), editedAt: null
+    },
+    {
+      id: generateId(), name: 'Marcus Bell', phone: '(708) 555-0182', location: 'Crete',
+      occupation: 'Firefighter',
+      talked: "Huge Bears fan. Restoring a '72 Chevelle in his garage.",
+      hasPets: false, petKind: '',
+      hasKids: true, kidInfo: '1 — newborn daughter',
+      notes: 'Low skin fade, 2 guard on top. Comes in every 3 weeks.',
+      createdAt: daysAgo(2, 14), editedAt: null
+    },
+    {
+      id: generateId(), name: 'Elena Ruiz', phone: '(815) 555-0126', location: 'Frankfort',
+      occupation: 'Owns a bakery',
+      talked: 'Opening a second location in the spring. Loves true crime podcasts.',
+      hasPets: true, petKind: 'Two cats, Mochi and Pepper',
+      hasKids: false, kidInfo: '',
+      notes: 'Sensitive to fragranced products. Curly — dry cut only.',
+      createdAt: daysAgo(6, 11), editedAt: daysAgo(1, 16)
+    },
+    {
+      id: generateId(), name: 'Derek Thompson', phone: '(219) 555-0163', location: 'Munster',
+      occupation: 'History teacher and baseball coach',
+      talked: 'Coaching summer league. Planning a trip to Ireland next year.',
+      hasPets: true, petKind: 'Golden retriever, a big goofy dog named Duke',
+      hasKids: true, kidInfo: '3 teenagers',
+      notes: 'Scissor cut, keeps it long on top. Ask how the team is doing.',
+      createdAt: daysAgo(9, 13), editedAt: null
+    }
+  ].sort((a, b) => new Date(b.editedAt || b.createdAt) - new Date(a.editedAt || a.createdAt)));
+}
+
+seedSampleClients();
 
 // ── INIT ──────────────────────────────────────────────────
 // App starts on the "Add" screen — ready to capture fast

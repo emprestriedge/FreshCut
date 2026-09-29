@@ -33,5 +33,7 @@ Clean, finished build. No pending work. iOS wrap is a someday-maybe.
   - Date match = added OR edited (confirmed).
 - Fields (Erin's list): Name, Phone Number, Location (new), Hair Type / Clipper Guard, Conversation, Any Pets? (What kind?), Any Kids? (How many?), Notes (new, last).
 - Pop-up: solid (opaque) light purple with dark-purple fields pressed in; hairline outline on every card.
-- Draft (current): https://6abbadf8208f50009861402d--freshcutrecall.netlify.app — status card: ~/Cowork/Claude/projects/freshcut.md
+- Hair Type / Clipper Guard replaced by **Occupation** (her 2nd question; not hair-specific for the PFD demo). Hair details → Notes.
+- 4 sample clients seed on first launch only (empty devices), for demo screenshots; she'll delete them.
+- Draft (current): https://6abbb12ae698bc5fa55824cf--freshcutrecall.netlify.app — status card: ~/Cowork/Claude/projects/freshcut.md
 - Mockup: claude.ai artifact "FreshCut Backgrounds".
