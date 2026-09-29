@@ -16,7 +16,7 @@
 ## Where we left off
 Clean, finished build. No pending work. iOS wrap is a someday-maybe.
 
-## Design refresh (2026-09-29 — built on branch design-refresh-2026-09-29, DRAFT deployed, prod awaiting Erin)
+## Design refresh (2026-09-29 — ✅ LIVE in production, branch design-refresh-2026-09-29 pushed)
 - Purpose: FreshCut is a demo piece on the PFD website; function stays as-is, visual polish only.
 - Background: **Teal Plaster** (`DigitalAssets/images/green-texture-bg copy.jpg`) chosen over Brown Marble and Purple Haze, darkened 27%.
 - Main form card: see-through at **67% opacity** (was 85%), no blur, so the texture shows. Purple input boxes stay solid.
@@ -34,6 +34,6 @@ Clean, finished build. No pending work. iOS wrap is a someday-maybe.
 - Fields (Erin's list): Name, Phone Number, Location (new), Hair Type / Clipper Guard, Conversation, Any Pets? (What kind?), Any Kids? (How many?), Notes (new, last).
 - Pop-up: solid (opaque) light purple with dark-purple fields pressed in; hairline outline on every card.
 - Hair Type / Clipper Guard replaced by **Occupation** (her 2nd question; not hair-specific for the PFD demo). Hair details → Notes.
-- 4 sample clients seed on first launch only (empty devices), for demo screenshots; she'll delete them.
+- 4 sample clients seed on first launch only (empty devices). Erin chose to KEEP them for the PFD demo.
 - Draft (current): https://6abbb12ae698bc5fa55824cf--freshcutrecall.netlify.app — status card: ~/Cowork/Claude/projects/freshcut.md
 - Mockup: claude.ai artifact "FreshCut Backgrounds".

@@ -1,5 +1,7 @@
 /* ══════════════════════════════════════════════════════════
    FRESHCUT RECALL — Dark Jewel-Tone Stylesheet
+   2026-09-29 refresh: Teal Plaster background, neumorphic surfaces,
+   see-through cards at 67%, pale antique gold small text.
    Color Palette:
      Deep Purple Gradient background
      Dark Surface #1A1525  (cards, form backgrounds)
@@ -36,6 +38,18 @@
   --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
   --radius: 14px;
   --radius-sm: 10px;
+
+  /* Design refresh 2026-09-29 — neumorphic on Teal Plaster */
+  --meta: #C8BD93;                /* pale antique gold — tagline, counts, previews, dates */
+  --n-lift: #433960;              /* light side of a raised/pressed purple surface */
+  --n-sink: #120D1A;              /* dark side */
+  --n-raise: -5px -5px 12px var(--n-lift), 5px 5px 12px var(--n-sink);
+  --n-raise-sm: -3px -3px 7px var(--n-lift), 3px 3px 7px var(--n-sink);
+  --n-press: inset 4px 4px 8px var(--n-sink), inset -4px -4px 8px var(--n-lift);
+  --glass: rgba(42,36,56,0.67);   /* see-through cards, 67% */
+  --halo: 0 1px 2px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.75), 0 0 18px rgba(0,0,0,.5);
+  --hairline: linear-gradient(155deg, rgba(255,255,255,.32) 0%, rgba(255,255,255,.12) 35%, rgba(255,255,255,.05) 65%, rgba(255,255,255,.12) 100%);
+  --well-dark: #1A1525;           /* dark purple pressed into the lighter pop-up */
 }
 
 /* ── RESET & BASE ──────────────────────────────── */
@@ -53,15 +67,7 @@ html {
 
 body {
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(
-    170deg,
-    #1E0A2E 0%,
-    #160822 25%,
-    #0F0619 50%,
-    #0A0412 75%,
-    #07030D 100%
-  );
-  background-attachment: fixed;
+  background: var(--deep-purple);
   color: var(--text-bright);
   min-height: 100dvh;
   padding-bottom: 80px;
@@ -70,7 +76,20 @@ body {
   position: relative;
 }
 
+/* Teal Plaster background, darkened 27%. A fixed layer (not background-attachment:fixed, which iOS ignores). */
 body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(4,12,16,.27) 0%, rgba(4,12,16,.2) 50%, rgba(4,12,16,.37) 100%),
+    url('teal-plaster-bg.jpg') 30% center / cover no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Skull watermark — screen blend drops its black box on the photo ground */
+body::after {
   content: '';
   position: fixed;
   top: 50%;
@@ -79,7 +98,8 @@ body::before {
   width: 90vmin;
   height: 90vmin;
   background: url('skull-bg.jpg') center/contain no-repeat;
-  opacity: 0.06;
+  mix-blend-mode: screen;
+  opacity: 0.09;
   pointer-events: none;
   z-index: 0;
 }
@@ -97,11 +117,12 @@ input, textarea, button, select {
   left: 0;
   right: 0;
   display: flex;
-  background: linear-gradient(180deg, #1A1028 0%, #120B1E 100%);
-  border-top: 1px solid rgba(98,55,78,0.25);
-  padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  gap: 0.8rem;
+  background: #1A1028;
+  border-radius: 26px 26px 0 0;
+  padding: 0.55rem 0.8rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
   z-index: 100;
-  box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
+  box-shadow: 0 -10px 26px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .tab-btn {
@@ -116,8 +137,9 @@ input, textarea, button, select {
   color: var(--text-dim);
   font-size: 0.7rem;
   font-weight: 500;
+  border-radius: 16px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s, box-shadow 0.2s;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -129,6 +151,7 @@ input, textarea, button, select {
 
 .tab-btn.active {
   color: var(--teal-light);
+  box-shadow: inset 3px 3px 7px #0A0612, inset -3px -3px 7px #271A3A;   /* pressed well */
 }
 
 .tab-btn.active i {
@@ -184,9 +207,10 @@ input, textarea, button, select {
 }
 
 .tagline {
-  color: var(--text-mid);
+  color: var(--meta);
+  text-shadow: var(--halo);
   font-size: 0.85rem;
-  font-weight: 300;
+  font-weight: 400;
   margin-top: 0.15rem;
   letter-spacing: 0.02em;
 }
@@ -194,12 +218,10 @@ input, textarea, button, select {
 /* ── FORM ──────────────────────────────────────── */
 
 .entry-form {
-  background: rgba(26,21,37,0.85);
-  border: 1px solid rgba(98,55,78,0.2);
-  border-radius: var(--radius);
-  padding: 1.5rem 1.25rem;
-  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.03);
-  backdrop-filter: blur(10px);
+  background: var(--glass);
+  border-radius: 24px;
+  padding: 1.4rem 1.2rem;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35), inset 1px 1px 0 rgba(255,255,255,0.1);
 }
 
 .form-group {
@@ -229,21 +251,20 @@ input, textarea, button, select {
 .form-group input[type="tel"],
 .form-group textarea {
   width: 100%;
-  padding: 0.7rem 0.9rem;
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+  border: 0;
+  border-radius: 14px;
   font-size: 0.95rem;
   color: var(--text-bright);
   background: var(--charcoal);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--n-press);
+  transition: box-shadow 0.2s;
   outline: none;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-glow), 0 0 15px var(--teal-glow);
-  background: var(--charcoal-light);
+  box-shadow: var(--n-press), 0 0 0 2px rgba(0,155,163,0.55), 0 0 16px var(--teal-glow);
 }
 
 .form-group textarea {
@@ -265,48 +286,58 @@ input, textarea, button, select {
 
 .toggle-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 .toggle-btn {
   flex: 1;
-  padding: 0.55rem 1rem;
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 14px;
   background: var(--charcoal);
   color: var(--text-mid);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
+  box-shadow: var(--n-raise-sm);
   transition: all 0.2s;
 }
 
 .toggle-btn:hover {
-  border-color: var(--teal);
   color: var(--teal-light);
 }
 
 .toggle-btn.selected-yes {
   background: var(--teal);
-  border-color: var(--teal);
   color: var(--white);
-  box-shadow: 0 0 15px var(--teal-glow);
+  box-shadow: inset 3px 3px 7px #004E54, inset -3px -3px 7px #00A2AC, 0 0 16px var(--teal-glow);
 }
 
 .toggle-btn.selected-no {
   background: var(--plum);
-  border-color: var(--plum);
   color: var(--white);
-  box-shadow: 0 0 12px rgba(98,55,78,0.25);
+  box-shadow: inset 3px 3px 7px #3E2232, inset -3px -3px 7px #86506C;
 }
 
 /* ── SUB-FIELDS (pet kind, kid info) ──────────── */
 
 .sub-field {
+  position: relative;
   margin-left: 1rem;
-  padding-left: 0.75rem;
-  border-left: 3px solid var(--gold);
+  padding-left: 0.9rem;
   transition: all 0.3s ease;
+}
+
+.sub-field::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(253,197,123,0.45);
 }
 
 .sub-field.hidden {
@@ -321,8 +352,8 @@ input, textarea, button, select {
 
 .form-actions {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
+  gap: 1rem;
+  margin-top: 1.4rem;
 }
 
 .btn-save {
@@ -331,7 +362,7 @@ input, textarea, button, select {
   background: linear-gradient(135deg, var(--plum) 0%, var(--teal) 100%);
   color: var(--white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   font-family: 'Bebas Neue', 'Montserrat', sans-serif;
   font-size: 1.1rem;
   font-weight: 400;
@@ -339,7 +370,7 @@ input, textarea, button, select {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 20px rgba(0,120,128,0.2), 0 0 20px rgba(98,55,78,0.15);
+  box-shadow: var(--n-raise), 0 0 18px rgba(0,120,128,0.25);
 }
 
 .btn-save:hover {
@@ -349,6 +380,7 @@ input, textarea, button, select {
 
 .btn-save:active {
   transform: scale(0.97);
+  box-shadow: var(--n-press);
 }
 
 .btn-save.editing {
@@ -363,9 +395,10 @@ input, textarea, button, select {
 .btn-clear {
   flex: 1;
   padding: 0.8rem 1rem;
-  background: none;
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
+  background: var(--charcoal);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise);
   color: var(--text-mid);
   font-size: 0.9rem;
   font-weight: 500;
@@ -374,8 +407,11 @@ input, textarea, button, select {
 }
 
 .btn-clear:hover {
-  border-color: var(--danger);
   color: var(--danger-light);
+}
+
+.btn-clear:active {
+  box-shadow: var(--n-press);
 }
 
 /* ── SEARCH BAR ────────────────────────────────── */
@@ -384,26 +420,29 @@ input, textarea, button, select {
   display: flex;
   align-items: center;
   background: var(--charcoal);
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 0.9rem;
+  border: 0;
+  border-radius: 14px;
+  padding: 0.45rem 0.4rem 0.45rem 0.9rem;
   margin-top: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--n-press);
+  transition: box-shadow 0.2s;
 }
 
 .search-bar:focus-within {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-glow);
+  box-shadow: var(--n-press), 0 0 0 2px rgba(0,155,163,0.55);
 }
 
-.search-bar i {
-  color: var(--text-dim);
+.search-bar > i {
+  color: var(--teal-light);
   margin-right: 0.5rem;
   font-size: 0.9rem;
 }
 
 .search-bar input {
   flex: 1;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
   border: none;
   outline: none;
   font-size: 0.95rem;
@@ -419,7 +458,8 @@ input, textarea, button, select {
 .client-count {
   margin-top: 0.6rem;
   font-size: 0.78rem;
-  color: var(--text-dim);
+  color: var(--meta);
+  text-shadow: var(--halo);
   font-weight: 400;
 }
 
@@ -441,7 +481,8 @@ input, textarea, button, select {
 .empty-state p {
   font-size: 0.95rem;
   font-weight: 400;
-  color: var(--text-mid);
+  color: var(--meta);
+  text-shadow: var(--halo);
 }
 
 /* ── CLIENT LIST ───────────────────────────────── */
@@ -449,27 +490,44 @@ input, textarea, button, select {
 .client-list {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.85rem;
 }
 
 .client-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  background: rgba(26,21,37,0.8);
-  border: 1px solid rgba(98,55,78,0.15);
+  background: var(--glass);
   padding: 0.9rem 1rem;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
+  border-radius: 18px;
+  box-shadow: -5px -5px 12px rgba(190,215,215,0.07), 6px 6px 14px rgba(0,0,0,0.55),
+              inset 1px 1px 0 rgba(255,255,255,0.1), inset -1px -1px 0 rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.2s;
-  backdrop-filter: blur(8px);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.client-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-  border-color: rgba(0,120,128,0.3);
+/* Apple-style hairline: light catches the top-left edge and fades around the card.
+   See-through cards use a masked ::before; solid cards (pop-up, calendar) use a border-box gradient. */
+.entry-form { position: relative; }
+.entry-form::before,
+.client-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 0.5pt;
+  pointer-events: none;
+  background: var(--hairline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .client-card:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .client-card:active {
@@ -490,7 +548,7 @@ input, textarea, button, select {
   font-size: 1.1rem;
   flex-shrink: 0;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 10px rgba(0,120,128,0.15);
+  box-shadow: inset 3px 3px 7px #004E54, inset -3px -3px 7px #00A2AC, 0 0 12px var(--teal-glow);   /* pressed, like Yes */
 }
 
 .client-info {
@@ -509,7 +567,7 @@ input, textarea, button, select {
 
 .client-preview {
   font-size: 0.78rem;
-  color: var(--text-dim);
+  color: var(--meta);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -517,10 +575,15 @@ input, textarea, button, select {
 }
 
 .client-date {
-  color: var(--text-dim);
-  font-size: 0.82rem;
+  color: var(--meta);
+  font-size: 0.8rem;
   flex-shrink: 0;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  background: var(--charcoal);
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+  box-shadow: inset 3px 3px 6px var(--n-sink), inset -3px -3px 6px var(--n-lift);   /* pressed-in well */
 }
 
 /* ── EXPORT BUTTON ─────────────────────────────── */
@@ -532,11 +595,12 @@ input, textarea, button, select {
 }
 
 .btn-export {
-  padding: 0.6rem 1.2rem;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-dim);
+  padding: 0.7rem 1.3rem;
+  background: var(--charcoal);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise);
+  color: var(--text-mid);
   font-size: 0.8rem;
   font-weight: 400;
   cursor: pointer;
@@ -545,10 +609,10 @@ input, textarea, button, select {
 
 .btn-export i {
   margin-right: 0.3rem;
+  color: var(--teal-light);
 }
 
 .btn-export:hover {
-  border-color: var(--teal);
   color: var(--teal-light);
 }
 
@@ -580,9 +644,9 @@ input, textarea, button, select {
 }
 
 .modal-card {
-  background: linear-gradient(170deg, #1E1530 0%, #150E22 100%);
-  border: 1px solid rgba(98,55,78,0.2);
-  border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(var(--charcoal), var(--charcoal)) padding-box, var(--hairline) border-box;
+  border: 0.5pt solid transparent;
+  border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
   max-height: 85vh;
@@ -590,7 +654,7 @@ input, textarea, button, select {
   padding: 1.5rem 1.25rem 2rem;
   position: relative;
   animation: slideUp 0.3s ease;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.55);
 }
 
 @keyframes slideUp {
@@ -603,7 +667,8 @@ input, textarea, button, select {
   top: 1rem;
   right: 1rem;
   background: var(--charcoal);
-  border: 1px solid var(--border);
+  border: 0;
+  box-shadow: var(--n-raise-sm);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -617,9 +682,11 @@ input, textarea, button, select {
 }
 
 .modal-close:hover {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: var(--white);
+  color: var(--danger-light);
+}
+
+.modal-close:active {
+  box-shadow: var(--n-press);
 }
 
 /* ── PROFILE CONTENT ───────────────────────────── */
@@ -643,7 +710,7 @@ input, textarea, button, select {
   font-size: 1.6rem;
   margin: 0 auto 0.6rem;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 25px rgba(0,120,128,0.2), 0 0 25px rgba(98,55,78,0.2);
+  box-shadow: inset 4px 4px 9px #004E54, inset -4px -4px 9px #00A2AC, 0 0 22px var(--teal-glow);   /* pressed, like Yes */
 }
 
 .profile-name {
@@ -667,10 +734,10 @@ input, textarea, button, select {
 }
 
 .profile-field {
-  background: rgba(42,36,56,0.6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 0.9rem;
+  background: var(--well-dark);
+  border-radius: 14px;
+  padding: 0.8rem 0.95rem;
+  box-shadow: inset 4px 4px 9px #0B0810, inset -3px -3px 8px #3A3150;   /* pressed in */
 }
 
 .profile-field-label {
@@ -706,7 +773,7 @@ input, textarea, button, select {
   background: linear-gradient(135deg, var(--plum) 0%, var(--teal) 100%);
   color: var(--white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   font-family: 'Bebas Neue', 'Montserrat', sans-serif;
   font-size: 1rem;
   font-weight: 400;
@@ -714,7 +781,7 @@ input, textarea, button, select {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 20px rgba(0,120,128,0.2), 0 0 20px rgba(98,55,78,0.15);
+  box-shadow: var(--n-raise), 0 0 18px rgba(0,120,128,0.25);
 }
 
 .btn-edit:hover {
@@ -723,14 +790,16 @@ input, textarea, button, select {
 
 .btn-edit:active {
   transform: scale(0.97);
+  box-shadow: var(--n-press);
 }
 
 .btn-delete {
   flex: 1;
   padding: 0.75rem 1rem;
-  background: none;
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
+  background: var(--charcoal);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise);
   color: var(--text-mid);
   font-size: 0.9rem;
   font-weight: 500;
@@ -739,9 +808,11 @@ input, textarea, button, select {
 }
 
 .btn-delete:hover {
-  border-color: var(--danger);
   color: var(--danger-light);
-  background: rgba(192,57,43,0.1);
+}
+
+.btn-delete:active {
+  box-shadow: var(--n-press);
 }
 
 /* ── TOAST NOTIFICATION ────────────────────────── */
@@ -794,7 +865,8 @@ input, textarea, button, select {
   background: var(--danger);
   color: var(--white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
+  box-shadow: var(--n-raise-sm);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -809,8 +881,9 @@ input, textarea, button, select {
   padding: 0.6rem 1.5rem;
   background: var(--charcoal);
   color: var(--text-mid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise-sm);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -819,6 +892,207 @@ input, textarea, button, select {
 
 .btn-cancel-delete:hover {
   background: var(--charcoal-light);
+}
+
+/* ── KEYWORD SEARCH + DATE PICKER (2026-09-29) ─── */
+
+.search-wrap {
+  position: relative;
+}
+
+.search-bar input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.cal-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--charcoal);
+  color: var(--text-mid);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--n-raise-sm);
+  transition: color 0.2s, box-shadow 0.2s;
+}
+
+.cal-btn::before {            /* grows the tap target to 44pt without growing the button */
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.cal-btn i { font-size: 0.95rem; }
+
+.cal-btn.on {
+  color: var(--teal-light);
+  box-shadow: inset 2px 2px 5px var(--n-sink), inset -2px -2px 5px var(--n-lift), 0 0 12px var(--teal-glow);
+}
+
+.cal {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  background: linear-gradient(var(--charcoal), var(--charcoal)) padding-box, var(--hairline) border-box;
+  border: 0.5pt solid transparent;
+  border-radius: 20px;
+  padding: 0.9rem 0.8rem 0.7rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  text-align: left;
+  animation: fadeIn 0.18s ease;
+}
+
+.cal.hidden { display: none; }
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.cal-title {
+  font-family: 'Bebas Neue', 'Montserrat', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.cal-nav {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--charcoal);
+  color: var(--text-mid);
+  cursor: pointer;
+  box-shadow: var(--n-raise-sm);
+  display: grid;
+  place-items: center;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  text-align: center;
+}
+
+.cal-dow {
+  font-family: 'Bebas Neue', 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.cal-day {
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-mid);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.cal-day.blank { cursor: default; }
+.cal-day.has { color: var(--text-bright); }
+.cal-day.today { color: var(--gold); }
+
+.cal-day.has::after,
+.cal-dot {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--teal-light);
+  box-shadow: 0 0 6px var(--teal-light);
+  vertical-align: middle;
+}
+
+.cal-day.has::after {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  margin-left: -2px;
+}
+
+.cal-day.sel {
+  background: var(--teal);
+  color: var(--white);
+  box-shadow: inset 3px 3px 7px #004E54, inset -3px -3px 7px #00A2AC, 0 0 14px var(--teal-glow);
+}
+
+.cal-day.sel::after { background: var(--white); box-shadow: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .cal-day:not(.blank):hover { color: var(--text-bright); box-shadow: var(--n-raise-sm); }
+  .cal-nav:hover, .cal-btn:hover { color: var(--teal-light); }
+}
+
+.cal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.clear-link {
+  background: none;
+  border: 0;
+  padding: 0 0 1px;
+  margin-left: 0.4rem;
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--teal-light);
+  border-bottom: 1px solid var(--teal-light);
+  text-shadow: none;
+  cursor: pointer;
+}
+
+.cal-btn:focus-visible, .cal-nav:focus-visible, .cal-day:focus-visible, .clear-link:focus-visible {
+  outline: 2px solid var(--teal-light);
+  outline-offset: 2px;
+}
+
+/* A keyword match: matched words in teal, and two lines so they stay visible */
+.client-preview mark {
+  background: none;
+  color: var(--teal-light);
+  font-weight: 600;
+}
+
+.client-name mark {
+  background: none;
+  color: var(--teal-light);
+}
+
+.client-preview .fld {
+  opacity: 0.7;
+  margin-right: 0.3rem;
+}
+
+.client-preview.snip {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
 }
 
 /* ── RESPONSIVE ────────────────────────────────── */
@@ -834,7 +1108,7 @@ input, textarea, button, select {
     align-items: center;
   }
   .modal-card {
-    border-radius: var(--radius);
+    border-radius: 24px;
     max-height: 80vh;
   }
 }

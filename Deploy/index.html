@@ -54,18 +54,23 @@
       </div>
 
       <div class="form-group">
-        <label for="clipperType"><i class="fas fa-ruler"></i> Clipper / Hair Type</label>
-        <input type="text" id="clipperType" placeholder="e.g. 2 guard, coarse & curly" autocomplete="off" />
+        <label for="location"><i class="fas fa-location-dot"></i> Location</label>
+        <input type="text" id="location" placeholder="Town or neighborhood" autocomplete="off" />
       </div>
 
       <div class="form-group">
-        <label for="talkAbout"><i class="fas fa-comments"></i> What'd you talk about?</label>
-        <textarea id="talkAbout" rows="2" placeholder="Job, hobbies, sports team, whatever came up..."></textarea>
+        <label for="occupation"><i class="fas fa-briefcase"></i> Occupation</label>
+        <input type="text" id="occupation" placeholder="What do they do?" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="talkAbout"><i class="fas fa-comments"></i> Conversation</label>
+        <textarea id="talkAbout" rows="2" placeholder="Hobbies, family, sports team, whatever came up..."></textarea>
       </div>
 
       <!-- Pets section -->
       <div class="form-group toggle-group">
-        <label><i class="fas fa-paw"></i> Pets?</label>
+        <label><i class="fas fa-paw"></i> Any Pets?</label>
         <div class="toggle-row">
           <button type="button" class="toggle-btn" id="petsYes" onclick="togglePets(true)">Yes</button>
           <button type="button" class="toggle-btn" id="petsNo" onclick="togglePets(false)">No</button>
@@ -78,15 +83,20 @@
 
       <!-- Kids section -->
       <div class="form-group toggle-group">
-        <label><i class="fas fa-child"></i> Kids?</label>
+        <label><i class="fas fa-child"></i> Any Kids?</label>
         <div class="toggle-row">
           <button type="button" class="toggle-btn" id="kidsYes" onclick="toggleKids(true)">Yes</button>
           <button type="button" class="toggle-btn" id="kidsNo" onclick="toggleKids(false)">No</button>
         </div>
       </div>
       <div class="form-group sub-field hidden" id="kidDetails">
-        <label for="kidInfo">How many & ages</label>
+        <label for="kidInfo">How many?</label>
         <input type="text" id="kidInfo" placeholder="e.g. 3 teen daughters, 2 adult boys" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="notes"><i class="fas fa-note-sticky"></i> Notes</label>
+        <textarea id="notes" rows="2" placeholder="Anything else worth remembering..."></textarea>
       </div>
 
       <div class="form-actions">
@@ -106,9 +116,15 @@
   <main class="screen" id="screen-database">
     <header class="screen-header">
       <h1><i class="fas fa-address-book"></i> Your Clients</h1>
-      <div class="search-bar">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Search by name or phone..." oninput="filterClients()" autocomplete="off" />
+      <div class="search-wrap">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="search" id="searchInput" placeholder="Name, phone or keyword" oninput="filterClients()" autocomplete="off" aria-label="Search clients" />
+          <button type="button" class="cal-btn" id="calBtn" onclick="toggleCalendar()" aria-label="Pick a date" aria-expanded="false">
+            <i class="fas fa-calendar-days"></i>
+          </button>
+        </div>
+        <div class="cal hidden" id="calendar"></div>
       </div>
       <p class="client-count" id="clientCount">0 people saved</p>
     </header>

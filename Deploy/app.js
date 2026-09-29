@@ -123,8 +123,10 @@ function handleSave(event) {
   const editId = document.getElementById('editId').value;
   const name = document.getElementById('personName').value.trim();
   const phone = document.getElementById('phoneNumber').value.trim();
-  const clipper = document.getElementById('clipperType').value.trim();
+  const occupation = document.getElementById('occupation').value.trim();
   const talked = document.getElementById('talkAbout').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const notes = document.getElementById('notes').value.trim();
   const petKind = document.getElementById('petKind').value.trim();
   const kidInfo = document.getElementById('kidInfo').value.trim();
 
@@ -141,12 +143,14 @@ function handleSave(event) {
         ...clients[index],
         name,
         phone,
-        clipper,
+        location,
+        occupation,
         talked,
         hasPets,
         petKind: hasPets ? petKind : '',
         hasKids,
         kidInfo: hasKids ? kidInfo : '',
+        notes,
         editedAt: now
       };
     }
@@ -158,12 +162,14 @@ function handleSave(event) {
       id: generateId(),
       name,
       phone,
-      clipper,
+      location,
+      occupation,
       talked,
       hasPets,
       petKind: hasPets ? petKind : '',
       hasKids,
       kidInfo: hasKids ? kidInfo : '',
+      notes,
       createdAt: now,
       editedAt: null
     };
@@ -181,10 +187,12 @@ function clearForm() {
   document.getElementById('editId').value = '';
   document.getElementById('personName').value = '';
   document.getElementById('phoneNumber').value = '';
-  document.getElementById('clipperType').value = '';
+  document.getElementById('occupation').value = '';
   document.getElementById('talkAbout').value = '';
   document.getElementById('petKind').value = '';
   document.getElementById('kidInfo').value = '';
+  document.getElementById('location').value = '';
+  document.getElementById('notes').value = '';
 
   // Reset toggles
   hasPets = null;
@@ -209,30 +217,98 @@ function clearForm() {
 }
 
 // ── RENDER CLIENT LIST ────────────────────────────────────
+// Search + date filter live in state so every re-render
+// (tab switch, delete, save) keeps what you were looking at.
 
-function renderClientList(filter = '') {
+let searchQuery = '';   // what's typed in the search box
+let filterDay = null;   // 'YYYY-M-D' when a calendar day is picked
+let calView = null;     // first day of the month the calendar shows
+
+// Fields a keyword can match, in the order a match is shown on the card
+const SEARCH_FIELDS = [
+  ['talked', 'Conversation'],
+  ['petKind', 'Pets'],
+  ['kidInfo', 'Kids'],
+  ['notes', 'Notes'],
+  ['location', 'Location'],
+  ['occupation', 'Occupation'],
+  ['name', ''],
+  ['phone', '']
+];
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// A calendar day as a plain key, in local time
+function dayKey(isoString) {
+  const d = new Date(isoString);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+// Which fields contain one search word (phone matches on digits only)
+function fieldsMatching(client, word) {
+  const hits = SEARCH_FIELDS
+    .filter(([key]) => client[key] && String(client[key]).toLowerCase().includes(word))
+    .map(([key]) => key);
+  const digits = word.replace(/\D/g, '');
+  if (digits.length >= 3 && client.phone && client.phone.replace(/\D/g, '').includes(digits) && !hits.includes('phone')) {
+    hits.push('phone');
+  }
+  return hits;
+}
+
+// Every word must appear somewhere (any order). Returns the matched fields, or null.
+function matchClient(client, words) {
+  const found = new Set();
+  for (const word of words) {
+    const hits = fieldsMatching(client, word);
+    if (hits.length === 0) return null;
+    hits.forEach(h => found.add(h));
+  }
+  return found;
+}
+
+// Wrap each search word in <mark> (text is escaped first)
+function highlight(text, words) {
+  let out = escapeHtml(text);
+  words.forEach(w => {
+    const safe = escapeHtml(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out = out.replace(new RegExp(`(${safe})`, 'ig'), '<mark>$1</mark>');
+  });
+  return out;
+}
+
+function renderClientList() {
   const clients = loadClients();
   const listEl = document.getElementById('clientList');
   const emptyEl = document.getElementById('emptyState');
   const countEl = document.getElementById('clientCount');
-  const search = filter.toLowerCase().trim();
+  const words = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
 
-  // Filter clients by name or phone
-  const filtered = search
-    ? clients.filter(c =>
-        c.name.toLowerCase().includes(search) ||
-        (c.phone && c.phone.replace(/\D/g, '').includes(search.replace(/\D/g, '')))
-      )
-    : clients;
+  // Filter by picked day (added OR edited that day), then by keywords
+  const rows = [];
+  clients.forEach(c => {
+    if (filterDay) {
+      const onDay = (c.createdAt && dayKey(c.createdAt) === filterDay) ||
+                    (c.editedAt && dayKey(c.editedAt) === filterDay);
+      if (!onDay) return;
+    }
+    const found = words.length ? matchClient(c, words) : new Set();
+    if (found) rows.push({ client: c, found });
+  });
 
   // Update count
   const total = clients.length;
-  const showing = filtered.length;
-  if (search && showing !== total) {
+  const showing = rows.length;
+  if (filterDay) {
+    const [, m, d] = filterDay.split('-').map(Number);
+    countEl.innerHTML = `${showing} of ${total} on ${MONTH_NAMES[m - 1].slice(0, 3)} ${d}` +
+      `<button type="button" class="clear-link" onclick="clearDateFilter()">Clear date</button>`;
+  } else if (words.length && showing !== total) {
     countEl.textContent = `${showing} of ${total} people`;
   } else {
     countEl.textContent = `${total} ${total === 1 ? 'person' : 'people'} saved`;
   }
+  document.getElementById('calBtn').classList.toggle('on', !!filterDay);
 
   // Show empty state or list
   if (clients.length === 0) {
@@ -243,27 +319,39 @@ function renderClientList(filter = '') {
 
   emptyEl.style.display = 'none';
 
-  if (filtered.length === 0) {
+  if (rows.length === 0) {
     listEl.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-search"></i>
-        <p>No matches found</p>
+        <p>No matches found${filterDay ? ' on that day' : ''}</p>
       </div>
     `;
     return;
   }
 
   // Build client cards
-  listEl.innerHTML = filtered.map(client => {
+  listEl.innerHTML = rows.map(({ client, found }) => {
     const initials = getInitials(client.name);
-    const preview = client.clipper || client.talked || 'Tap to view';
     const lastDate = formatDate(client.editedAt || client.createdAt);
+
+    // When a keyword hits a detail field, show that field instead of the usual preview
+    let preview = escapeHtml(client.occupation || client.talked || 'Tap to view');
+    let snippet = false;
+    if (words.length) {
+      const hit = SEARCH_FIELDS.find(([key, label]) => label && found.has(key));
+      if (hit) {
+        preview = `<span class="fld">${hit[1]}</span>${highlight(client[hit[0]], words)}`;
+        snippet = true;
+      }
+    }
+    const nameHtml = words.length && found.has('name') ? highlight(client.name, words) : escapeHtml(client.name);
+
     return `
       <div class="client-card" onclick="openProfile('${client.id}')">
         <div class="client-avatar">${initials}</div>
         <div class="client-info">
-          <div class="client-name">${escapeHtml(client.name)}</div>
-          <div class="client-preview">${escapeHtml(preview)}</div>
+          <div class="client-name">${nameHtml}</div>
+          <div class="client-preview${snippet ? ' snip' : ''}">${preview}</div>
         </div>
         <div class="client-date">${lastDate}</div>
       </div>
@@ -274,9 +362,94 @@ function renderClientList(filter = '') {
 // ── SEARCH / FILTER ───────────────────────────────────────
 
 function filterClients() {
-  const query = document.getElementById('searchInput').value;
-  renderClientList(query);
+  searchQuery = document.getElementById('searchInput').value;
+  renderClientList();
 }
+
+// ── DATE PICKER ───────────────────────────────────────────
+// Calendar icon in the search box. Teal dots mark days with entries.
+
+function toggleCalendar(open) {
+  const cal = document.getElementById('calendar');
+  const btn = document.getElementById('calBtn');
+  const willOpen = typeof open === 'boolean' ? open : cal.classList.contains('hidden');
+  if (willOpen) {
+    if (!calView) {
+      const now = new Date();
+      calView = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    renderCalendar();
+  }
+  cal.classList.toggle('hidden', !willOpen);
+  btn.setAttribute('aria-expanded', willOpen);
+}
+
+function renderCalendar() {
+  const cal = document.getElementById('calendar');
+  const y = calView.getFullYear();
+  const m = calView.getMonth();
+  const firstWeekday = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const today = new Date();
+
+  // Days that have an entry added or edited
+  const withEntries = new Set();
+  loadClients().forEach(c => {
+    if (c.createdAt) withEntries.add(dayKey(c.createdAt));
+    if (c.editedAt) withEntries.add(dayKey(c.editedAt));
+  });
+
+  let cells = ['S','M','T','W','T','F','S'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < firstWeekday; i++) cells += '<span class="cal-day blank"></span>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${y}-${m + 1}-${d}`;
+    const cls = ['cal-day',
+      withEntries.has(key) ? 'has' : '',
+      filterDay === key ? 'sel' : '',
+      (y === today.getFullYear() && m === today.getMonth() && d === today.getDate()) ? 'today' : ''
+    ].filter(Boolean).join(' ');
+    cells += `<button type="button" class="${cls}" onclick="pickDay('${key}')" aria-label="${MONTH_NAMES[m]} ${d}">${d}</button>`;
+  }
+
+  cal.innerHTML = `
+    <div class="cal-head">
+      <button type="button" class="cal-nav" onclick="calNav(-1)" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+      <div class="cal-title">${MONTH_NAMES[m]} ${y}</div>
+      <button type="button" class="cal-nav" onclick="calNav(1)" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="cal-grid">${cells}</div>
+    <div class="cal-foot">
+      <span><span class="cal-dot"></span> days with entries</span>
+      ${filterDay ? '<button type="button" class="clear-link" onclick="clearDateFilter()">Clear date</button>' : ''}
+    </div>
+  `;
+}
+
+function calNav(step) {
+  calView = new Date(calView.getFullYear(), calView.getMonth() + step, 1);
+  renderCalendar();
+}
+
+function pickDay(key) {
+  filterDay = filterDay === key ? null : key;   // tap the same day again to clear
+  toggleCalendar(false);
+  renderClientList();
+}
+
+function clearDateFilter() {
+  filterDay = null;
+  renderClientList();
+  if (!document.getElementById('calendar').classList.contains('hidden')) renderCalendar();
+}
+
+// Close the calendar when tapping anywhere outside it
+document.addEventListener('click', function(e) {
+  const cal = document.getElementById('calendar');
+  if (cal.classList.contains('hidden')) return;
+  if (!document.contains(e.target)) return;   // tapped a button the calendar just redrew
+  if (e.target.closest('#calendar') || e.target.closest('#calBtn')) return;
+  toggleCalendar(false);
+});
 
 // ── PROFILE MODAL ─────────────────────────────────────────
 
@@ -296,9 +469,10 @@ function openProfile(clientId) {
 
   // Build profile fields
   const fields = [
-    { label: 'Phone', value: client.phone, icon: 'fa-phone' },
-    { label: 'Clipper / Hair Type', value: client.clipper, icon: 'fa-ruler' },
-    { label: 'Talked About', value: client.talked, icon: 'fa-comments' },
+    { label: 'Phone Number', value: client.phone, icon: 'fa-phone' },
+    { label: 'Location', value: client.location, icon: 'fa-location-dot' },
+    { label: 'Occupation', value: client.occupation, icon: 'fa-briefcase' },
+    { label: 'Conversation', value: client.talked, icon: 'fa-comments' },
     {
       label: 'Pets',
       value: client.hasPets === true
@@ -316,7 +490,8 @@ function openProfile(clientId) {
           ? 'No'
           : null,
       icon: 'fa-child'
-    }
+    },
+    { label: 'Notes', value: client.notes, icon: 'fa-note-sticky' }
   ];
 
   const fieldsHtml = fields.map(f => {
@@ -379,8 +554,10 @@ function editClient(clientId) {
   document.getElementById('editId').value = client.id;
   document.getElementById('personName').value = client.name;
   document.getElementById('phoneNumber').value = client.phone || '';
-  document.getElementById('clipperType').value = client.clipper || '';
+  document.getElementById('occupation').value = client.occupation || '';
   document.getElementById('talkAbout').value = client.talked || '';
+  document.getElementById('location').value = client.location || '';
+  document.getElementById('notes').value = client.notes || '';
 
   // Set pet toggle
   if (client.hasPets === true) {
@@ -490,16 +667,18 @@ function exportToCSV() {
     return;
   }
 
-  const headers = ['Name', 'Phone', 'Clipper/Hair Type', 'Talked About', 'Pets', 'Pet Kind', 'Kids', 'Kid Info', 'Date Added', 'Date Edited'];
+  const headers = ['Name', 'Phone', 'Location', 'Occupation', 'Conversation', 'Pets', 'Pet Kind', 'Kids', 'Kid Info', 'Notes', 'Date Added', 'Date Edited'];
   const rows = clients.map(c => [
     c.name,
     c.phone || '',
-    c.clipper || '',
+    c.location || '',
+    c.occupation || '',
     c.talked || '',
     c.hasPets === true ? 'Yes' : c.hasPets === false ? 'No' : '',
     c.petKind || '',
     c.hasKids === true ? 'Yes' : c.hasKids === false ? 'No' : '',
     c.kidInfo || '',
+    c.notes || '',
     c.createdAt ? formatDate(c.createdAt) : '',
     c.editedAt ? formatDate(c.editedAt) : ''
   ]);
@@ -517,6 +696,72 @@ function exportToCSV() {
   URL.revokeObjectURL(url);
   showToast('Exported!');
 }
+
+// ── SAMPLE CLIENTS (first launch only) ────────────────────
+// Four made-up people so a brand-new install (and the PFD demo)
+// opens with something to look at. Seeded once per device: delete
+// them and they stay gone. Dates are relative to the first launch
+// so the calendar always has dots in the current month.
+
+const SEEDED_KEY = 'freshcut-recall-sample-seeded';
+
+function seedSampleClients() {
+  try {
+    if (localStorage.getItem(SEEDED_KEY)) return;
+    localStorage.setItem(SEEDED_KEY, new Date().toISOString());
+    if (loadClients().length > 0) return;   // never mix samples into real data
+  } catch (e) {
+    return;
+  }
+
+  const daysAgo = (days, hour) => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    d.setHours(hour, 15, 0, 0);
+    return d.toISOString();
+  };
+
+  saveClients([
+    {
+      id: generateId(), name: 'Jasmine Carter', phone: '(708) 555-0147', location: 'Homewood',
+      occupation: 'Pediatric nurse',
+      talked: "Just got back from a girls' trip to Nashville. Training for her first half marathon.",
+      hasPets: true, petKind: 'Cocker spaniel named Biscuit',
+      hasKids: true, kidInfo: '2 — a 6 year old and a 9 year old',
+      notes: 'Wants to go lighter by summer. Prefers Saturday mornings.',
+      createdAt: daysAgo(0, 10), editedAt: null
+    },
+    {
+      id: generateId(), name: 'Marcus Bell', phone: '(708) 555-0182', location: 'Crete',
+      occupation: 'Firefighter',
+      talked: "Huge Bears fan. Restoring a '72 Chevelle in his garage.",
+      hasPets: false, petKind: '',
+      hasKids: true, kidInfo: '1 — newborn daughter',
+      notes: 'Low skin fade, 2 guard on top. Comes in every 3 weeks.',
+      createdAt: daysAgo(2, 14), editedAt: null
+    },
+    {
+      id: generateId(), name: 'Elena Ruiz', phone: '(815) 555-0126', location: 'Frankfort',
+      occupation: 'Owns a bakery',
+      talked: 'Opening a second location in the spring. Loves true crime podcasts.',
+      hasPets: true, petKind: 'Two cats, Mochi and Pepper',
+      hasKids: false, kidInfo: '',
+      notes: 'Sensitive to fragranced products. Curly — dry cut only.',
+      createdAt: daysAgo(6, 11), editedAt: daysAgo(1, 16)
+    },
+    {
+      id: generateId(), name: 'Derek Thompson', phone: '(219) 555-0163', location: 'Munster',
+      occupation: 'History teacher and baseball coach',
+      talked: 'Coaching summer league. Planning a trip to Ireland next year.',
+      hasPets: true, petKind: 'Golden retriever, a big goofy dog named Duke',
+      hasKids: true, kidInfo: '3 teenagers',
+      notes: 'Scissor cut, keeps it long on top. Ask how the team is doing.',
+      createdAt: daysAgo(9, 13), editedAt: null
+    }
+  ].sort((a, b) => new Date(b.editedAt || b.createdAt) - new Date(a.editedAt || a.createdAt)));
+}
+
+seedSampleClients();
 
 // ── INIT ──────────────────────────────────────────────────
 // App starts on the "Add" screen — ready to capture fast
