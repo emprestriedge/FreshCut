@@ -32,5 +32,6 @@ Clean, finished build. No pending work. iOS wrap is a someday-maybe.
   - Found existing bug: current search matches every client with a phone number for any non-number query (empty digit string always "includes"). Fixed in the new search.
   - Date match = added OR edited (confirmed).
 - Fields (Erin's list): Name, Phone Number, Location (new), Hair Type / Clipper Guard, Conversation, Any Pets? (What kind?), Any Kids? (How many?), Notes (new, last).
-- Draft: https://6abbab9bc09378297ee48933--freshcutrecall.netlify.app — status card: ~/Cowork/Claude/projects/freshcut.md
+- Pop-up: solid (opaque) light purple with dark-purple fields pressed in; hairline outline on every card.
+- Draft (current): https://6abbadf8208f50009861402d--freshcutrecall.netlify.app — status card: ~/Cowork/Claude/projects/freshcut.md
 - Mockup: claude.ai artifact "FreshCut Backgrounds".

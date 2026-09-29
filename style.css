@@ -48,6 +48,8 @@
   --n-press: inset 4px 4px 8px var(--n-sink), inset -4px -4px 8px var(--n-lift);
   --glass: rgba(42,36,56,0.67);   /* see-through cards, 67% */
   --halo: 0 1px 2px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.75), 0 0 18px rgba(0,0,0,.5);
+  --hairline: linear-gradient(155deg, rgba(255,255,255,.32) 0%, rgba(255,255,255,.12) 35%, rgba(255,255,255,.05) 65%, rgba(255,255,255,.12) 100%);
+  --well-dark: #1A1525;           /* dark purple pressed into the lighter pop-up */
 }
 
 /* ── RESET & BASE ──────────────────────────────── */
@@ -505,7 +507,10 @@ input, textarea, button, select {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
-/* Apple-style hairline: light catches the top-left edge and fades around the card */
+/* Apple-style hairline: light catches the top-left edge and fades around the card.
+   See-through cards use a masked ::before; solid cards (pop-up, calendar) use a border-box gradient. */
+.entry-form { position: relative; }
+.entry-form::before,
 .client-card::before {
   content: '';
   position: absolute;
@@ -513,7 +518,7 @@ input, textarea, button, select {
   border-radius: inherit;
   padding: 0.5pt;
   pointer-events: none;
-  background: linear-gradient(155deg, rgba(255,255,255,.32) 0%, rgba(255,255,255,.12) 35%, rgba(255,255,255,.05) 65%, rgba(255,255,255,.12) 100%);
+  background: var(--hairline);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -639,9 +644,9 @@ input, textarea, button, select {
 }
 
 .modal-card {
-  background: linear-gradient(170deg, #1E1530 0%, #150E22 100%);
-  border: 1px solid rgba(98,55,78,0.2);
-  border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(var(--charcoal), var(--charcoal)) padding-box, var(--hairline) border-box;
+  border: 0.5pt solid transparent;
+  border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
   max-height: 85vh;
@@ -649,7 +654,7 @@ input, textarea, button, select {
   padding: 1.5rem 1.25rem 2rem;
   position: relative;
   animation: slideUp 0.3s ease;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.55);
 }
 
 @keyframes slideUp {
@@ -662,7 +667,8 @@ input, textarea, button, select {
   top: 1rem;
   right: 1rem;
   background: var(--charcoal);
-  border: 1px solid var(--border);
+  border: 0;
+  box-shadow: var(--n-raise-sm);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -676,9 +682,11 @@ input, textarea, button, select {
 }
 
 .modal-close:hover {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: var(--white);
+  color: var(--danger-light);
+}
+
+.modal-close:active {
+  box-shadow: var(--n-press);
 }
 
 /* ── PROFILE CONTENT ───────────────────────────── */
@@ -702,7 +710,7 @@ input, textarea, button, select {
   font-size: 1.6rem;
   margin: 0 auto 0.6rem;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 25px rgba(0,120,128,0.2), 0 0 25px rgba(98,55,78,0.2);
+  box-shadow: inset 4px 4px 9px #004E54, inset -4px -4px 9px #00A2AC, 0 0 22px var(--teal-glow);   /* pressed, like Yes */
 }
 
 .profile-name {
@@ -726,10 +734,10 @@ input, textarea, button, select {
 }
 
 .profile-field {
-  background: rgba(42,36,56,0.6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 0.9rem;
+  background: var(--well-dark);
+  border-radius: 14px;
+  padding: 0.8rem 0.95rem;
+  box-shadow: inset 4px 4px 9px #0B0810, inset -3px -3px 8px #3A3150;   /* pressed in */
 }
 
 .profile-field-label {
@@ -765,7 +773,7 @@ input, textarea, button, select {
   background: linear-gradient(135deg, var(--plum) 0%, var(--teal) 100%);
   color: var(--white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   font-family: 'Bebas Neue', 'Montserrat', sans-serif;
   font-size: 1rem;
   font-weight: 400;
@@ -773,7 +781,7 @@ input, textarea, button, select {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 20px rgba(0,120,128,0.2), 0 0 20px rgba(98,55,78,0.15);
+  box-shadow: var(--n-raise), 0 0 18px rgba(0,120,128,0.25);
 }
 
 .btn-edit:hover {
@@ -782,14 +790,16 @@ input, textarea, button, select {
 
 .btn-edit:active {
   transform: scale(0.97);
+  box-shadow: var(--n-press);
 }
 
 .btn-delete {
   flex: 1;
   padding: 0.75rem 1rem;
-  background: none;
-  border: 2px solid var(--charcoal-light);
-  border-radius: var(--radius-sm);
+  background: var(--charcoal);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise);
   color: var(--text-mid);
   font-size: 0.9rem;
   font-weight: 500;
@@ -798,9 +808,11 @@ input, textarea, button, select {
 }
 
 .btn-delete:hover {
-  border-color: var(--danger);
   color: var(--danger-light);
-  background: rgba(192,57,43,0.1);
+}
+
+.btn-delete:active {
+  box-shadow: var(--n-press);
 }
 
 /* ── TOAST NOTIFICATION ────────────────────────── */
@@ -853,7 +865,8 @@ input, textarea, button, select {
   background: var(--danger);
   color: var(--white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
+  box-shadow: var(--n-raise-sm);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -868,8 +881,9 @@ input, textarea, button, select {
   padding: 0.6rem 1.5rem;
   background: var(--charcoal);
   color: var(--text-mid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: 14px;
+  box-shadow: var(--n-raise-sm);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -925,10 +939,11 @@ input, textarea, button, select {
   top: calc(100% + 10px);
   left: 0;
   right: 0;
-  background: var(--charcoal);
+  background: linear-gradient(var(--charcoal), var(--charcoal)) padding-box, var(--hairline) border-box;
+  border: 0.5pt solid transparent;
   border-radius: 20px;
   padding: 0.9rem 0.8rem 0.7rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 1px 1px 0 rgba(255,255,255,0.08), inset -1px -1px 0 rgba(0,0,0,0.35);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
   text-align: left;
   animation: fadeIn 0.18s ease;
 }
@@ -1093,7 +1108,7 @@ input, textarea, button, select {
     align-items: center;
   }
   .modal-card {
-    border-radius: var(--radius);
+    border-radius: 24px;
     max-height: 80vh;
   }
 }
